@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Vite + TS</title>
+  </head>
+  <body>
+    <div id="app">
+      Time:
+      <div>
+        <span data-time="h:MM:ss"></span>
+      </div>
+      on Time:
+      <div>
+        <span data-on-time='{"on":"0/10 * * * * *","off":"5/10 * * * * *"}'>Show 0-5s</span>
+      </div>
+      <div>
+        <span data-on-time='{"on":"0/10 * * * *","off":"5/10 * * * *"}'>Show 0-5m</span>
+      </div>
+      <div>
+        <span data-on-time='{"on":"5/10 * * * *","off":"10/10 * * * *"}'>Show 5-10m</span>
+      </div>
+    </div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

@@ -1,5 +1,6 @@
 # Logs
 logs
+data
 *.log
 npm-debug.log*
 yarn-debug.log*
@@ -128,3 +129,4 @@ dist
 .yarn/build-state.yml
 .yarn/install-state.gz
 .pnp.*
+/wp-golf-score.zip

@@ -1,0 +1,20 @@
+{
+  "name": "wp-time",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build --minify false",
+    "preview": "vite preview"
+  },
+  "devDependencies": {
+    "typescript": "^5.2.2",
+    "vite": "^5.0.0"
+  },
+  "dependencies": {
+    "@types/dateformat": "^5.0.2",
+    "cron-parser": "^4.9.0",
+    "dateformat": "^5.0.3"
+  }
+}
