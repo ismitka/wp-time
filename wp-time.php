@@ -34,6 +34,8 @@
 
 class WP_Time {
 
+	const CRON_REGEXP = "/^(\*|[0-9,\-\/\*]+)\s+(\*|[0-9,\-\/\*]+)\s+(\*|[0-9,\-\/\*]+)\s+(\*|[0-9,\-\/\*]+)\s+(\*|[0-9,\-\/\*]+)(\s+(\*|[0-9,\-\/\*]+))?$/";
+
 	public static function init() {
 		// Scripts
 		if ( ! is_admin() ) { // show only in public area
@@ -41,6 +43,8 @@ class WP_Time {
 				'WP_Time',
 				'enqueue_scripts'
 			] );
+			add_shortcode( 'wp-time', [ 'WP_Time', 'html_current' ] );
+			add_shortcode( 'wp-time-on', [ 'WP_Time', 'html_on' ] );
 		}
 	}
 
@@ -54,6 +58,32 @@ class WP_Time {
 			}
 		}
 
+	}
+
+	public static function html_current( $args = [] ) {
+		if ( ! is_array( $args ) || ! array_key_exists( "format", $args ) || empty( $format = $args["format"] ) ) {
+			$format = "h:MM:ss";
+		}
+		ob_start();
+		?>
+        <span data-time="<?= $format ?>"></span>
+		<?php
+		return ob_get_clean();
+	}
+
+	public static function html_on( $args = [], $content = null ) {
+		if ( is_array( $args ) ) {
+			$on  = array_key_exists( "on", $args ) ? $args["on"] : null;
+			$off = array_key_exists( "off", $args ) ? $args["off"] : null;
+		}
+		ob_start();
+		if ( $on && $off && preg_match( self::CRON_REGEXP, $on ) && preg_match( self::CRON_REGEXP, $off ) ) {
+			?>
+            <span data-on-time='{"on":"<?= $on ?>","off":"<?= $off ?>"}'><?= do_shortcode( $content ) ?></span>
+			<?php
+		}
+
+		return ob_get_clean();
 	}
 }
 
