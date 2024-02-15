@@ -35,8 +35,6 @@
 
 class WP_Time {
 
-	const VERSION = "1.0";
-
 	const CRON_REGEXP = "/^(\*|[0-9,\-\/\*]+)\s+(\*|[0-9,\-\/\*]+)\s+(\*|[0-9,\-\/\*]+)\s+(\*|[0-9,\-\/\*]+)\s+(\*|[0-9,\-\/\*]+)(\s+(\*|[0-9,\-\/\*]+))?$/";
 
 	const UPDATE_URI = "https://www.smitka.net/wp-plugin/wp-time";
