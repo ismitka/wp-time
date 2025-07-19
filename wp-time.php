@@ -4,7 +4,7 @@
  * Plugin URI: https://www.smitka.net/wp-time
  * Update URI: https://www.smitka.net/wp-plugin/wp-time
  * Description: JavaScript init elements by Time
- * Version: 1.0
+ * Version: 1.1
  * Author: Ivan Smitka
  * Author URI: https://www.smitka.net
  * License: The MIT License
