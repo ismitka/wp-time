@@ -35,121 +35,135 @@
 
 class WP_Time {
 
-	const CRON_REGEXP = "/^(\*|[0-9,\-\/\*]+)\s+(\*|[0-9,\-\/\*]+)\s+(\*|[0-9,\-\/\*]+)\s+(\*|[0-9,\-\/\*]+)\s+(\*|[0-9,\-\/\*]+)(\s+(\*|[0-9,\-\/\*]+))?$/";
+    const CRON_REGEXP = "/^(\*|[0-9,\-\/\*]+)\s+(\*|[0-9,\-\/\*]+)\s+(\*|[0-9,\-\/\*]+)\s+(\*|[0-9,\-\/\*]+)\s+(\*|[0-9,\-\/\*]+)(\s+(\*|[0-9,\-\/\*]+))?$/";
 
-	const UPDATE_URI = "https://www.smitka.net/wp-plugin/wp-time";
+    const UPDATE_URI = "https://www.smitka.net/wp-plugin/wp-time";
 
 
-	public static function init() {
-		// Scripts
-		if ( ! is_admin() ) { // show only in public area
-			add_action( 'wp_enqueue_scripts', [
-				'WP_Time',
-				'enqueue_scripts'
-			] );
-			add_shortcode( 'wp-time', [ 'WP_Time', 'html_current' ] );
-			add_shortcode( 'wp-time-on', [ 'WP_Time', 'html_on' ] );
-		} else {
-			/* SelfHosted Updater Section */
-			add_filter( 'http_request_host_is_external', '__return_true' );
-			add_filter( 'update_plugins_www.smitka.net', function ( $update, $plugin_data, $plugin_file, $locales ) {
-				if ( $plugin_file === plugin_basename( __FILE__ ) ) {
-					return self::getUpdate( $plugin_data['UpdateURI'] );
-				}
+    public static function init() {
+        // Scripts
+        if ( ! is_admin() ) { // show only in public area
+            add_action( 'wp_enqueue_scripts', [
+                    'WP_Time',
+                    'enqueue_scripts'
+            ] );
+            add_shortcode( 'wp-time', [ 'WP_Time', 'html_current' ] );
+            add_shortcode( 'wp-time-on', [ 'WP_Time', 'html_on' ] );
+        } else {
+            /* SelfHosted Updater Section */
+            add_filter( 'http_request_host_is_external', '__return_true' );
+            add_filter( 'update_plugins_www.smitka.net', function ( $update, $plugin_data, $plugin_file, $locales ) {
+                if ( $plugin_file === plugin_basename( __FILE__ ) ) {
+                    return self::getUpdate( $plugin_data['UpdateURI'] );
+                }
 
-				return false;
-			}, 10, 4 );
-			add_filter( 'plugins_api', static function ( $res, $action, $args ) {
-				if ( plugin_basename( __DIR__ ) !== $args->slug ) {
-					return $res;
-				}
+                return false;
+            }, 10, 4 );
+            add_filter( 'plugins_api', static function ( $res, $action, $args ) {
+                if ( plugin_basename( __DIR__ ) !== $args->slug ) {
+                    return $res;
+                }
 
-				if ( $action !== 'plugin_information' ) {
-					return $res;
-				}
+                if ( $action !== 'plugin_information' ) {
+                    return $res;
+                }
 
-				$res                = self::getUpdate( self::UPDATE_URI );
-				$res->download_link = $res->package;
+                $res                = self::getUpdate( self::UPDATE_URI );
+                $res->download_link = $res->package;
 
-				return $res;
+                return $res;
 
-			}, 9999, 3 );
-			/* End of SelfHosted Updater Section */
-		}
-	}
+            }, 9999, 3 );
+            /* End of SelfHosted Updater Section */
+        }
+    }
 
-	/**
-	 * @param $update_URI
-	 *
-	 * @return mixed
-	 */
-	private static function getUpdate( $update_URI ): mixed {
-		try {
-			$request = wp_remote_get( $update_URI, [
-				'timeout' => 10,
-				'headers' => [
-					'Accept' => 'application/json'
-				]
-			] );
-			if (
-				is_wp_error( $request )
-				|| wp_remote_retrieve_response_code( $request ) !== 200
-				|| empty( $request_body = wp_remote_retrieve_body( $request ) )
-			) {
-				return false;
-			}
+    /**
+     * @param $update_URI
+     *
+     * @return mixed
+     */
+    private static function getUpdate( $update_URI ): mixed {
+        try {
+            $request = wp_remote_get( $update_URI, [
+                    'timeout' => 10,
+                    'headers' => [
+                            'Accept' => 'application/json'
+                    ]
+            ] );
+            if (
+                    is_wp_error( $request )
+                    || wp_remote_retrieve_response_code( $request ) !== 200
+                    || empty( $request_body = wp_remote_retrieve_body( $request ) )
+            ) {
+                return false;
+            }
 
-			$update = json_decode( $request_body, false );
-			if ( ! is_array( $update->sections ) && is_object( $update->sections ) ) {
-				$update->sections = (array) $update->sections;
-			}
+            $update = json_decode( $request_body, false );
+            if ( ! is_array( $update->sections ) && is_object( $update->sections ) ) {
+                $update->sections = (array) $update->sections;
+            }
 
-			return $update;
-		} catch ( Throwable $e ) {
-			return false;
-		}
-	}
+            return $update;
+        } catch ( Throwable $e ) {
+            return false;
+        }
+    }
 
-	public static function enqueue_scripts() {
-		foreach ( scandir( __DIR__ . "/dist/assets" ) as $path ) {
-			$pathInfo = pathinfo( $path );
-			if ( strpos( $pathInfo["filename"], "index" ) === 0 ) {
-				wp_enqueue_script( 'wp-time', plugins_url( "/dist/assets/{$path}", __FILE__ ), [ 'jquery' ] );
-				wp_enqueue_style( 'wp-time', plugins_url( 'static/css/time.css', __FILE__ ) );
-				break;
-			}
-		}
+    public static function enqueue_scripts() {
+        if ( is_dir( __DIR__ . "/dist/assets" ) ) {
+            foreach ( scandir( __DIR__ . "/dist/assets" ) as $path ) {
+                $pathInfo = pathinfo( $path );
+                if ( strpos( $pathInfo["filename"], "index" ) === 0 ) {
+                    wp_register_script( 'wp-time', plugins_url( "/dist/assets/{$path}", __FILE__ ), [ 'jquery' ] );
+                    wp_enqueue_script( 'wp-time' );
+                    add_filter( "script_loader_tag", [
+                            'WP_Time',
+                            "add_module_to_my_script"
+                    ], 10, 3 );
+                    wp_enqueue_style( 'wp-time', plugins_url( 'static/css/time.css', __FILE__ ) );
+                    break;
+                }
+            }
+        }
+    }
 
-	}
+    public static function add_module_to_my_script( $tag, $handle, $src ) {
+        if ( "wp-time" === $handle ) {
+            $tag = '<script id="wp-time-js" type="module" src="' . esc_url( $src ) . '"></script>';
+        }
 
-	public static function html_current( $args = [] ) {
-		if ( ! is_array( $args ) || ! array_key_exists( "format", $args ) || empty( $format = $args["format"] ) ) {
-			$format = "h:MM:ss";
-		}
-		ob_start();
-		?>
+        return $tag;
+    }
+
+    public static function html_current( $args = [] ) {
+        if ( ! is_array( $args ) || ! array_key_exists( "format", $args ) || empty( $format = $args["format"] ) ) {
+            $format = "h:MM:ss";
+        }
+        ob_start();
+        ?>
         <span data-time="<?= $format ?>"></span>
-		<?php
-		return ob_get_clean();
-	}
+        <?php
+        return ob_get_clean();
+    }
 
-	public static function html_on( $args = [], $content = null ) {
-		if ( is_array( $args ) ) {
-			$on  = array_key_exists( "on", $args ) ? $args["on"] : null;
-			$off = array_key_exists( "off", $args ) ? $args["off"] : null;
-		}
-		ob_start();
-		if ( $on && $off && preg_match( self::CRON_REGEXP, $on ) && preg_match( self::CRON_REGEXP, $off ) ) {
-			?>
+    public static function html_on( $args = [], $content = null ) {
+        if ( is_array( $args ) ) {
+            $on  = array_key_exists( "on", $args ) ? $args["on"] : null;
+            $off = array_key_exists( "off", $args ) ? $args["off"] : null;
+        }
+        ob_start();
+        if ( $on && $off && preg_match( self::CRON_REGEXP, $on ) && preg_match( self::CRON_REGEXP, $off ) ) {
+            ?>
             <span data-on-time='{"on":"<?= $on ?>","off":"<?= $off ?>"}'><?= do_shortcode( $content ) ?></span>
-			<?php
-		}
+            <?php
+        }
 
-		return ob_get_clean();
-	}
+        return ob_get_clean();
+    }
 }
 
 add_action( 'plugins_loaded', [
-	'WP_Time',
-	'init'
+        'WP_Time',
+        'init'
 ], 100 );
